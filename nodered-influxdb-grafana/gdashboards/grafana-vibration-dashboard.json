@@ -1,6 +1,6 @@
 {
-  "dashboard": {
     "id": null,
+    "uid": "vibration-dashboard",
     "title": "SCADA - Monitoramento de Vibração",
     "tags": ["scada", "vibration", "motor"],
     "style": "dark",
@@ -16,7 +16,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"vibration\")\n  |> filter(fn: (r) => r.equipment_name == \"motor1\")\n  |> filter(fn: (r) => r.direction == \"overall\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"scada_data\")\n  |> filter(fn: (r) => r._field == \"motor1_vibration_overall\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
             "refId": "A"
           }
         ],
@@ -108,7 +108,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "from(bucket: \"mybucket\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"equipment\")\n  |> filter(fn: (r) => r.equipment_name == \"motor1\")\n  |> filter(fn: (r) => r._field == \"vibration_overall\")\n  |> last()",
+            "query": "from(bucket: \"mybucket\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"scada_data\")\n  |> filter(fn: (r) => r._field == \"motor1_vibration_overall\")\n  |> last()",
             "refId": "A"
           }
         ],
@@ -176,7 +176,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"vibration\")\n  |> filter(fn: (r) => r.equipment_name == \"motor1\")\n  |> filter(fn: (r) => r.direction == \"axial\" or r.direction == \"radial_de\" or r.direction == \"radial_nde\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"scada_data\")\n  |> filter(fn: (r) => r._field == \"motor1_vibration_axial\" or r._field == \"motor1_vibration_radial_de\" or r._field == \"motor1_vibration_radial_nde\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
             "refId": "A"
           }
         ],
@@ -229,7 +229,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "vibration_axial"
+                "options": "motor1_vibration_axial"
               },
               "properties": [
                 {
@@ -248,7 +248,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "vibration_radial_de"
+                "options": "motor1_vibration_radial_de"
               },
               "properties": [
                 {
@@ -267,7 +267,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "vibration_radial_nde"
+                "options": "motor1_vibration_radial_nde"
               },
               "properties": [
                 {
@@ -313,7 +313,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "from(bucket: \"mybucket\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"equipment\")\n  |> filter(fn: (r) => r.equipment_name == \"motor1\")\n  |> filter(fn: (r) => r._field == \"vibration_1x_rpm\" or r._field == \"vibration_2x_rpm\" or r._field == \"vibration_high_freq\")\n  |> last()\n  |> group(columns: [\"_field\"])",
+            "query": "from(bucket: \"mybucket\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"scada_data\")\n  |> filter(fn: (r) => r._field == \"motor1_vib_1x_rpm\" or r._field == \"motor1_vib_2x_rpm\" or r._field == \"motor1_vib_high_freq\")\n  |> last()\n  |> group(columns: [\"_field\"])",
             "refId": "A"
           }
         ],
@@ -350,7 +350,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "vibration_1x_rpm"
+                "options": "motor1_vib_1x_rpm"
               },
               "properties": [
                 {
@@ -362,7 +362,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "vibration_2x_rpm"
+                "options": "motor1_vib_2x_rpm"
               },
               "properties": [
                 {
@@ -374,7 +374,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "vibration_high_freq"
+                "options": "motor1_vib_high_freq"
               },
               "properties": [
                 {
@@ -423,7 +423,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"equipment\")\n  |> filter(fn: (r) => r.equipment_name == \"motor1\")\n  |> filter(fn: (r) => r._field == \"bearing_temp_de\" or r._field == \"bearing_temp_nde\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"scada_data\")\n  |> filter(fn: (r) => r._field == \"motor1_bearing_temp_de\" or r._field == \"motor1_bearing_temp_nde\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
             "refId": "A"
           }
         ],
@@ -484,7 +484,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "bearing_temp_de"
+                "options": "motor1_bearing_temp_de"
               },
               "properties": [
                 {
@@ -496,7 +496,7 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "bearing_temp_nde"
+                "options": "motor1_bearing_temp_nde"
               },
               "properties": [
                 {
@@ -535,7 +535,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"alerts\")\n  |> filter(fn: (r) => r._field == \"message\")\n  |> filter(fn: (r) => r._value =~ /vibração|Vibração|rolamento|Rolamento/)\n  |> sort(columns: [\"_time\"], desc: true)",
+            "query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"scada_data\")\n  |> filter(fn: (r) => r._field == \"message\")\n  |> filter(fn: (r) => r._value =~ /vibração|Vibração|rolamento|Rolamento/)\n  |> sort(columns: [\"_time\"], desc: true)",
             "refId": "A"
           }
         ],
@@ -562,11 +562,8 @@
       "to": "now"
     },
     "timepicker": {},
-    "timezone": "",
     "refresh": "5s",
     "schemaVersion": 30,
     "version": 0,
     "links": []
-  },
-  "overwrite": false
 }
