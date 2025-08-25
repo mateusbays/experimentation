@@ -7,6 +7,21 @@
         "info": "Sistema SCADA simulado com sensores, alertas e API"
     },
     {
+        "id": "influx-config",
+        "type": "influxdb",
+        "hostname": "influxdb",
+        "port": "8086",
+        "protocol": "http",
+        "database": "scada",
+        "name": "InfluxDB SCADA",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://influxdb:8086",
+        "timeout": "",
+        "rejectUnauthorized": false
+    },
+    {
         "id": "sensor-inject",
         "type": "inject",
         "z": "scada-simulator",
@@ -94,7 +109,7 @@
         "z": "scada-simulator",
         "influxdb": "influx-config",
         "name": "Save to InfluxDB",
-        "measurement": "",
+        "measurement": "msg.measurement",
         "precision": "ns",
         "retentionPolicy": "",
         "database": "",
@@ -119,7 +134,9 @@
         "libs": [],
         "x": 650,
         "y": 200,
-        "wires": []
+        "wires": [
+            []
+        ]
     },
     {
         "id": "api-endpoint",
@@ -214,22 +231,5 @@
         "x": 690,
         "y": 360,
         "wires": []
-    },
-    {
-        "id": "influx-config",
-        "type": "influxdb",
-        "hostname": "influxdb",
-        "port": "8086",
-        "protocol": "http",
-        "database": "scada",
-        "name": "InfluxDB SCADA",
-        "usetls": false,
-        "tls": "",
-        "influxdbVersion": "2.0",
-        "url": "http://influxdb:8086",
-        "rejectUnauthorized": false,
-        "token": "mytoken123456789",
-        "org": "myorg",
-        "bucket": "mybucket"
     }
 ]
