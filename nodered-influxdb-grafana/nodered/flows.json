@@ -1,0 +1,235 @@
+[
+    {
+        "id": "scada-simulator",
+        "type": "tab",
+        "label": "SCADA Simulator",
+        "disabled": false,
+        "info": "Sistema SCADA simulado com sensores, alertas e API"
+    },
+    {
+        "id": "influx-config",
+        "type": "influxdb",
+        "hostname": "influxdb",
+        "port": "8086",
+        "protocol": "http",
+        "database": "scada",
+        "name": "InfluxDB SCADA",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://influxdb:8086",
+        "timeout": "",
+        "rejectUnauthorized": false
+    },
+    {
+        "id": "sensor-inject",
+        "type": "inject",
+        "z": "scada-simulator",
+        "name": "Sensor Data Generator",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 100,
+        "wires": [
+            [
+                "generate-sensors"
+            ]
+        ]
+    },
+    {
+        "id": "generate-sensors",
+        "type": "function",
+        "z": "scada-simulator",
+        "name": "Generate Sensor Data",
+        "func": "// Simular dados de sensores industriais\nconst timestamp = new Date().toISOString();\nconst baseTemp = 75; // Temperatura base\nconst basePressure = 2.5; // Pressão base\nconst baseFlow = 150; // Vazão base\nconst baseLevel = 60; // Nível base\n\n// Adicionar variação aleatória\nconst tempVariation = (Math.random() - 0.5) * 10;\nconst pressureVariation = (Math.random() - 0.5) * 0.5;\nconst flowVariation = (Math.random() - 0.5) * 30;\nconst levelVariation = (Math.random() - 0.5) * 20;\n\n// Dados dos sensores\nconst sensorData = {\n    timestamp: timestamp,\n    sensors: {\n        temperature: {\n            value: Math.round((baseTemp + tempVariation) * 100) / 100,\n            unit: \"°C\",\n            location: \"Reator Principal\",\n            status: \"OK\"\n        },\n        pressure: {\n            value: Math.round((basePressure + pressureVariation) * 100) / 100,\n            unit: \"bar\",\n            location: \"Linha de Vapor\",\n            status: \"OK\"\n        },\n        flow: {\n            value: Math.round(baseFlow + flowVariation),\n            unit: \"L/min\",\n            location: \"Entrada Principal\",\n            status: \"OK\"\n        },\n        level: {\n            value: Math.round(baseLevel + levelVariation),\n            unit: \"%\",\n            location: \"Tanque 001\",\n            status: \"OK\"\n        }\n    },\n    equipment: {\n        motor1: {\n            name: \"Motor Principal\",\n            status: Math.random() > 0.1 ? \"RUNNING\" : \"STOPPED\",\n            rpm: Math.round(1750 + (Math.random() - 0.5) * 100),\n            power: Math.round((15 + (Math.random() - 0.5) * 3) * 100) / 100,\n            temperature: Math.round((65 + (Math.random() - 0.5) * 10) * 100) / 100,\n            vibration: {\n                overall: Math.round((2.5 + (Math.random() - 0.5) * 1.5) * 100) / 100,\n                axial: Math.round((1.2 + (Math.random() - 0.5) * 0.8) * 100) / 100,\n                radial_de: Math.round((2.0 + (Math.random() - 0.5) * 1.2) * 100) / 100,\n                radial_nde: Math.round((1.8 + (Math.random() - 0.5) * 1.0) * 100) / 100,\n                unit: \"mm/s RMS\",\n                frequency_bands: {\n                    \"1x_rpm\": Math.round((0.8 + (Math.random() - 0.5) * 0.6) * 100) / 100,\n                    \"2x_rpm\": Math.round((0.4 + (Math.random() - 0.5) * 0.3) * 100) / 100,\n                    \"high_freq\": Math.round((0.3 + (Math.random() - 0.5) * 0.2) * 100) / 100\n                },\n                thresholds: {\n                    good: 2.8,\n                    satisfactory: 7.1,\n                    unsatisfactory: 18.0,\n                    unacceptable: 45.0\n                }\n            },\n            bearing_condition: {\n                de_bearing: Math.random() > 0.95 ? \"WARNING\" : \"GOOD\",\n                nde_bearing: Math.random() > 0.98 ? \"WARNING\" : \"GOOD\",\n                temperature_de: Math.round((45 + (Math.random() - 0.5) * 8) * 100) / 100,\n                temperature_nde: Math.round((42 + (Math.random() - 0.5) * 6) * 100) / 100\n            }\n        },\n        pump1: {\n            status: Math.random() > 0.05 ? \"ON\" : \"MAINTENANCE\",\n            efficiency: Math.round((85 + (Math.random() - 0.5) * 10) * 100) / 100\n        }\n    }\n};\n\n// Gerar alertas baseados nos valores\nconst alerts = [];\n\nif (sensorData.sensors.temperature.value > 85) {\n    alerts.push({\n        level: \"CRITICAL\",\n        message: \"Temperatura alta no reator\",\n        value: sensorData.sensors.temperature.value,\n        timestamp: timestamp\n    });\n}\n\nif (sensorData.sensors.pressure.value > 3.0) {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Pressão elevada na linha de vapor\",\n        value: sensorData.sensors.pressure.value,\n        timestamp: timestamp\n    });\n}\n\nif (sensorData.sensors.level.value < 20) {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Nível baixo no tanque 001\",\n        value: sensorData.sensors.level.value,\n        timestamp: timestamp\n    });\n}\n\nif (sensorData.equipment.motor1.status === \"STOPPED\") {\n    alerts.push({\n        level: \"INFO\",\n        message: \"Motor 1 desligado\",\n        timestamp: timestamp\n    });\n}\n\n// Alertas de vibração\nconst vibration = sensorData.equipment.motor1.vibration;\nif (vibration.overall > vibration.thresholds.unacceptable) {\n    alerts.push({\n        level: \"CRITICAL\",\n        message: \"Vibração crítica no motor principal\",\n        value: vibration.overall,\n        threshold: vibration.thresholds.unacceptable,\n        unit: vibration.unit,\n        timestamp: timestamp\n    });\n} else if (vibration.overall > vibration.thresholds.unsatisfactory) {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Vibração alta no motor principal\",\n        value: vibration.overall,\n        threshold: vibration.thresholds.unsatisfactory,\n        unit: vibration.unit,\n        timestamp: timestamp\n    });\n} else if (vibration.overall > vibration.thresholds.satisfactory) {\n    alerts.push({\n        level: \"INFO\",\n        message: \"Vibração acima do ideal no motor principal\",\n        value: vibration.overall,\n        threshold: vibration.thresholds.satisfactory,\n        unit: vibration.unit,\n        timestamp: timestamp\n    });\n}\n\n// Alertas de rolamentos\nif (sensorData.equipment.motor1.bearing_condition.de_bearing === \"WARNING\") {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Rolamento DE com indicação de desgaste\",\n        equipment: \"motor1\",\n        component: \"bearing_de\",\n        timestamp: timestamp\n    });\n}\n\nif (sensorData.equipment.motor1.bearing_condition.nde_bearing === \"WARNING\") {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Rolamento NDE com indicação de desgaste\",\n        equipment: \"motor1\",\n        component: \"bearing_nde\",\n        timestamp: timestamp\n    });\n}\n\n// Alertas de temperatura de rolamentos\nif (sensorData.equipment.motor1.bearing_condition.temperature_de > 60) {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Temperatura alta no rolamento DE\",\n        value: sensorData.equipment.motor1.bearing_condition.temperature_de,\n        threshold: 60,\n        unit: \"°C\",\n        timestamp: timestamp\n    });\n}\n\nif (sensorData.equipment.motor1.bearing_condition.temperature_nde > 60) {\n    alerts.push({\n        level: \"WARNING\",\n        message: \"Temperatura alta no rolamento NDE\",\n        value: sensorData.equipment.motor1.bearing_condition.temperature_nde,\n        threshold: 60,\n        unit: \"°C\",\n        timestamp: timestamp\n    });\n}\n\nsensorData.alerts = alerts;\n\n// Armazenar dados globalmente para API\nglobal.set(\"scadaData\", sensorData);\n\nmsg.payload = sensorData;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "debug-output",
+                "influx-format",
+                "store-api-data"
+            ]
+        ]
+    },
+    {
+        "id": "debug-output",
+        "type": "debug",
+        "z": "scada-simulator",
+        "name": "SCADA Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "influx-format",
+        "type": "function",
+        "z": "scada-simulator",
+        "name": "Format for InfluxDB",
+        "func": "const data = msg.payload;\n\n// Criar payload estruturado para InfluxDB\nconst influxData = {\n    measurement: 'scada_data',\n    tags: {\n        timestamp: data.timestamp\n    },\n    fields: {}\n};\n\n// Sensores\nObject.keys(data.sensors).forEach(sensorName => {\n    const sensor = data.sensors[sensorName];\n    influxData.fields[`sensor_${sensorName}`] = sensor.value;\n    influxData.tags[`${sensorName}_location`] = sensor.location;\n    influxData.tags[`${sensorName}_status`] = sensor.status;\n});\n\n// Equipamentos\nObject.keys(data.equipment).forEach(equipName => {\n    const equip = data.equipment[equipName];\n    \n    // Dados básicos do equipamento\n    if (equip.rpm) influxData.fields[`${equipName}_rpm`] = equip.rpm;\n    if (equip.power) influxData.fields[`${equipName}_power`] = equip.power;\n    if (equip.temperature) influxData.fields[`${equipName}_temperature`] = equip.temperature;\n    if (equip.status) influxData.tags[`${equipName}_status`] = equip.status;\n    \n    // Vibração\n    if (equip.vibration) {\n        influxData.fields[`${equipName}_vibration_overall`] = equip.vibration.overall;\n        influxData.fields[`${equipName}_vibration_axial`] = equip.vibration.axial;\n        influxData.fields[`${equipName}_vibration_radial_de`] = equip.vibration.radial_de;\n        influxData.fields[`${equipName}_vibration_radial_nde`] = equip.vibration.radial_nde;\n        \n        // Bandas de frequência\n        if (equip.vibration.frequency_bands) {\n            influxData.fields[`${equipName}_vib_1x_rpm`] = equip.vibration.frequency_bands['1x_rpm'];\n            influxData.fields[`${equipName}_vib_2x_rpm`] = equip.vibration.frequency_bands['2x_rpm'];\n            influxData.fields[`${equipName}_vib_high_freq`] = equip.vibration.frequency_bands['high_freq'];\n        }\n    }\n    \n    // Rolamentos\n    if (equip.bearing_condition) {\n        influxData.fields[`${equipName}_bearing_temp_de`] = equip.bearing_condition.temperature_de;\n        influxData.fields[`${equipName}_bearing_temp_nde`] = equip.bearing_condition.temperature_nde;\n    }\n});\n\n// Alertas - contar por nível\nconst alertCounts = { INFO: 0, WARNING: 0, CRITICAL: 0 };\ndata.alerts.forEach(alert => {\n    alertCounts[alert.level]++;\n});\n\ninfluxData.fields['alerts_info'] = alertCounts.INFO;\ninfluxData.fields['alerts_warning'] = alertCounts.WARNING;\ninfluxData.fields['alerts_critical'] = alertCounts.CRITICAL;\ninfluxData.fields['alerts_total'] = data.alerts.length;\n\n// Retornar mensagem formatada\nmsg.payload = influxData.fields;\nmsg.measurement = influxData.measurement;\nmsg.tags = influxData.tags;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 140,
+        "wires": [
+            [
+                "influx-out"
+            ]
+        ]
+    },
+    {
+        "id": "influx-out",
+        "type": "influxdb out",
+        "z": "scada-simulator",
+        "influxdb": "influx-config",
+        "name": "Save to InfluxDB",
+        "measurement": "msg.measurement",
+        "precision": "ns",
+        "retentionPolicy": "",
+        "database": "",
+        "precisionV18FluxV20": "ns",
+        "retentionPolicyV18Flux": "",
+        "org": "myorg",
+        "bucket": "mybucket",
+        "x": 870,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "store-api-data",
+        "type": "function",
+        "z": "scada-simulator",
+        "name": "Store for API",
+        "func": "// Armazenar dados para API\nconst currentData = msg.payload;\n\n// Manter histórico dos últimos 100 registros\nlet history = global.get(\"scadaHistory\") || [];\nhistory.push(currentData);\n\nif (history.length > 100) {\n    history = history.slice(-100);\n}\n\nglobal.set(\"scadaHistory\", history);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "api-endpoint",
+        "type": "http in",
+        "z": "scada-simulator",
+        "name": "GET /api/scada/current",
+        "url": "/api/scada/current",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 300,
+        "wires": [
+            [
+                "api-response"
+            ]
+        ]
+    },
+    {
+        "id": "api-response",
+        "type": "function",
+        "z": "scada-simulator",
+        "name": "API Response",
+        "func": "const currentData = global.get(\"scadaData\") || {};\n\nmsg.payload = {\n    status: \"success\",\n    timestamp: new Date().toISOString(),\n    data: currentData\n};\n\nmsg.headers = {\n    \"Content-Type\": \"application/json\",\n    \"Access-Control-Allow-Origin\": \"*\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 300,
+        "wires": [
+            [
+                "api-out"
+            ]
+        ]
+    },
+    {
+        "id": "api-out",
+        "type": "http response",
+        "z": "scada-simulator",
+        "name": "HTTP Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 630,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "api-history-endpoint",
+        "type": "http in",
+        "z": "scada-simulator",
+        "name": "GET /api/scada/history",
+        "url": "/api/scada/history",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 360,
+        "wires": [
+            [
+                "api-history-response"
+            ]
+        ]
+    },
+    {
+        "id": "api-history-response",
+        "type": "function",
+        "z": "scada-simulator",
+        "name": "API History Response",
+        "func": "const history = global.get(\"scadaHistory\") || [];\nconst limit = parseInt(msg.req.query.limit) || 50;\n\nmsg.payload = {\n    status: \"success\",\n    timestamp: new Date().toISOString(),\n    count: history.length,\n    data: history.slice(-limit)\n};\n\nmsg.headers = {\n    \"Content-Type\": \"application/json\",\n    \"Access-Control-Allow-Origin\": \"*\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 360,
+        "wires": [
+            [
+                "api-history-out"
+            ]
+        ]
+    },
+    {
+        "id": "api-history-out",
+        "type": "http response",
+        "z": "scada-simulator",
+        "name": "HTTP Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 690,
+        "y": 360,
+        "wires": []
+    }
+]

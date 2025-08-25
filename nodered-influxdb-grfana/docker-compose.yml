@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  nodered:
+    build:
+      context: ./nodered-image
+    image: nodered-custom:latest
+    container_name: nodered-container
+    ports:
+      - '1880:1880'
+    environment:
+      - TZ=America/Sao_Paulo
+      - FLOWS=flows.json
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_ORG=myorg
+      - INFLUXDB_BUCKET=mybucket
+      - INFLUXDB_TOKEN=mytoken123456789
+    volumes:
+      - ./nodered:/data
+    user: '${UID}:${GID}'
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb-container
+    ports:
+      - '8086:8086'
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword
+      - DOCKER_INFLUXDB_INIT_ORG=myorg
+      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=mytoken123456789
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:9.5.15
+    container_name: grafana-container
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./gprovisioning:/etc/grafana/provisioning
+      - ./gdashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/grafana-vibration-dashboard.json
+      - GF_LOG_LEVEL=debug
+    user: '${UID}:${GID}'
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    networks:
+      - monitoring-network
+
+networks:
+  monitoring-network:
+    driver: bridge
+
+volumes:
+  nodered_data:
+  influxdb_data:
+  grafana_data:
