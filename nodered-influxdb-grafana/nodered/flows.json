@@ -7,6 +7,33 @@
         "info": "Sistema SCADA simulado com sensores, alertas e API"
     },
     {
+        "id": "4465aca6074091f5",
+        "type": "tab",
+        "label": "OPC UA Server & Client",
+        "disabled": false,
+        "info": "Servidor e Cliente OPC UA - Use os botões na ordem: 1) Aguarde servidor iniciar, 2) Teste conexão, 3) Use os clientes"
+    },
+    {
+        "id": "77016dde4a4d4def",
+        "type": "group",
+        "z": "4465aca6074091f5",
+        "name": "Requisitar token de STAGING",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "5052e71fdb388e8f",
+            "99a6bbbc145d5344",
+            "b93f74e85bfe8837",
+            "030645cd95289645",
+            "d6ac0f45c3c0edb6"
+        ],
+        "x": 34,
+        "y": -1,
+        "w": 1212,
+        "h": 122
+    },
+    {
         "id": "influx-config",
         "type": "influxdb",
         "hostname": "influxdb",
@@ -20,6 +47,69 @@
         "url": "http://influxdb:8086",
         "timeout": "",
         "rejectUnauthorized": false
+    },
+    {
+        "id": "58980407b6092fdb",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.17.0.1:53530/OPCUA/SimulationServer",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "f336b7056c3680ba",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://localhost:4840/UA/NodeRED_Server",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false
+    },
+    {
+        "id": "b68a59962197919d",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://localhost:4840/UA/NodeRED_Server",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false
+    },
+    {
+        "id": "304c02ee1b940e96",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "3c3c3c3c3c3c3c3c",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://localhost:4840",
+        "secpol": "None",
+        "secmode": "NONE",
+        "login": false
+    },
+    {
+        "id": "a5",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://localhost:4840",
+        "secpol": "None",
+        "secmode": "NONE",
+        "login": false
     },
     {
         "id": "sensor-inject",
@@ -72,7 +162,7 @@
         "type": "debug",
         "z": "scada-simulator",
         "name": "SCADA Debug",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -230,6 +320,352 @@
         "headers": {},
         "x": 690,
         "y": 360,
+        "wires": []
+    },
+    {
+        "id": "6140fa35ba91dc33",
+        "type": "OpcUa-Client",
+        "z": "4465aca6074091f5",
+        "endpoint": "58980407b6092fdb",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "",
+        "x": 420,
+        "y": 320,
+        "wires": [
+            [
+                "c1a722f4b7b3bbe4",
+                "ca18f7a4699be2da"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "b1e3882692d19969",
+        "type": "inject",
+        "z": "4465aca6074091f5",
+        "name": "📖 Ler temperatura",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "ns=3;i=1009;",
+        "payload": "timestamp",
+        "payloadType": "str",
+        "x": 180,
+        "y": 320,
+        "wires": [
+            [
+                "6140fa35ba91dc33"
+            ]
+        ]
+    },
+    {
+        "id": "c1a722f4b7b3bbe4",
+        "type": "debug",
+        "z": "4465aca6074091f5",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "2491b7ed649522f0",
+        "type": "http request",
+        "z": "4465aca6074091f5",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://sandbox.predict.dynamox.solutions/psa/v1alpha2/telemetry-cycles",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1020,
+        "y": 300,
+        "wires": [
+            [
+                "b06dd1db99e2b91a"
+            ]
+        ]
+    },
+    {
+        "id": "ca18f7a4699be2da",
+        "type": "function",
+        "z": "4465aca6074091f5",
+        "name": "MAPPER DOS DADOS",
+        "func": "const temperature = msg.payload;\nconst dateNow = new Date().toISOString();\n// pegar o token que requisitamos acima e setamos na variável do flow\nconst token = flow.get('TOKEN');\n\nmsg.headers = {\n    Authorization: \"Bearer \" + token\n};\n\nmsg.payload = {\n    \"configuration\": {\n        \"telemetryMeasurementIntervalInMinutes\": 1\n    },\n    \"telemetryCycleData\": {\n        \"tags\": [],\n        \"measurements\": [\n            {\n                \"dataPoints\": [\n                      {\n                  \"value\": temperature,\n                  \"timestamp\": dateNow\n                },\n                ],\n                \"resourceId\": \"68b86e707bba991231572935\",\n                \"attributes\": {\n                    \"physicalQuantity\": \"temperature\",\n                    \"source\": \"dynamox-lens\"\n                }\n            }\n        ],\n        \"measuringSystemUniqueIdentifier\": \"Node-Red\",\n        \"metadata\": {\n            \"corrupted\": false,\n            \"corruptionReason\": []\n        },\n        \"measuringSystemModel\": {\n            \"version\": 1,\n            \"name\": \"dynamox-lens\"\n        },\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 300,
+        "wires": [
+            [
+                "2491b7ed649522f0",
+                "a2dd19677a6edcc4"
+            ]
+        ]
+    },
+    {
+        "id": "b06dd1db99e2b91a",
+        "type": "debug",
+        "z": "4465aca6074091f5",
+        "name": "debug 2",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1220,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "a2dd19677a6edcc4",
+        "type": "debug",
+        "z": "4465aca6074091f5",
+        "name": "debug 3",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "5052e71fdb388e8f",
+        "type": "http request",
+        "z": "4465aca6074091f5",
+        "g": "77016dde4a4d4def",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyCbgUaYoVbBUTy3RN2rJrfhmvdZW5G5f7k",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 680,
+        "y": 80,
+        "wires": [
+            [
+                "030645cd95289645"
+            ]
+        ]
+    },
+    {
+        "id": "99a6bbbc145d5344",
+        "type": "function",
+        "z": "4465aca6074091f5",
+        "g": "77016dde4a4d4def",
+        "name": "email/password configuration",
+        "func": "msg.payload = {\n  \"email\": \"seu-email@dynamox.net\",\n  \"password\": \"sua-senha\",\n  \"returnSecureToken\": true\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 80,
+        "wires": [
+            [
+                "5052e71fdb388e8f"
+            ]
+        ]
+    },
+    {
+        "id": "b93f74e85bfe8837",
+        "type": "inject",
+        "z": "4465aca6074091f5",
+        "g": "77016dde4a4d4def",
+        "name": "request token",
+        "props": [],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 160,
+        "y": 80,
+        "wires": [
+            [
+                "99a6bbbc145d5344"
+            ]
+        ]
+    },
+    {
+        "id": "030645cd95289645",
+        "type": "function",
+        "z": "4465aca6074091f5",
+        "g": "77016dde4a4d4def",
+        "name": "Setar token em uma variavel com escopo do flow",
+        "func": "const { idToken } = JSON.parse(msg.payload);\nflow.set('TOKEN', idToken)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a1",
+        "type": "inject",
+        "z": "4465aca6074091f5",
+        "name": "Disparar leitura",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 220,
+        "y": 880,
+        "wires": [
+            [
+                "a2"
+            ]
+        ]
+    },
+    {
+        "id": "a2",
+        "type": "function",
+        "z": "4465aca6074091f5",
+        "name": "Múltiplos Nodes",
+        "func": "msg.payload = [\n  { nodeId: \"ns=1;i=1009\" },\n  { nodeId: \"ns=1;i=1012\" },\n  { nodeId: \"ns=1;i=1013\" }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 880,
+        "wires": [
+            [
+                "a3"
+            ]
+        ]
+    },
+    {
+        "id": "a3",
+        "type": "OpcUa-Client",
+        "z": "4465aca6074091f5",
+        "endpoint": "58980407b6092fdb",
+        "action": "readmultiple",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": "",
+        "timeUnit": "s",
+        "localfile": "",
+        "localkeyfile": "",
+        "useTransport": false,
+        "maxChunkCount": "",
+        "maxMessageSize": "",
+        "receiveBufferSize": "",
+        "sendBufferSize": "",
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "Ler Nodes",
+        "x": 650,
+        "y": 880,
+        "wires": [
+            [
+                "a4"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "a4",
+        "type": "debug",
+        "z": "4465aca6074091f5",
+        "name": "Resultado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 810,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "d6ac0f45c3c0edb6",
+        "type": "comment",
+        "z": "4465aca6074091f5",
+        "g": "77016dde4a4d4def",
+        "name": "",
+        "info": "Ao setar uma variável com escopo no flow, ela pode ser acessada em qualquer outro nó do flow.",
+        "x": 900,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "c73197c7f8609a66",
+        "type": "comment",
+        "z": "4465aca6074091f5",
+        "name": "LEIA",
+        "info": "#  -  - Essa conexão OPC UA pode ser substituida por uma requisição para alguma api ou outro protocolo de comunicação, por exemplo.",
+        "x": 390,
+        "y": 260,
         "wires": []
     }
 ]

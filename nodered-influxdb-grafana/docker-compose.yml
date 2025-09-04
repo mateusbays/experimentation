@@ -8,6 +8,7 @@ services:
     container_name: nodered-container
     ports:
       - '1880:1880'
+      - '4840:4840'  
     environment:
       - TZ=America/Sao_Paulo
       - FLOWS=flows.json
@@ -20,7 +21,7 @@ services:
     user: '${UID}:${GID}'
     restart: unless-stopped
     networks:
-      - monitoring-network
+     - plc-network  
 
   influxdb:
     image: influxdb:2.7
@@ -38,7 +39,7 @@ services:
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=mytoken123456789
     restart: unless-stopped
     networks:
-      - monitoring-network
+      - plc-network 
 
   grafana:
     image: grafana/grafana:9.5.15
@@ -59,10 +60,10 @@ services:
     depends_on:
       - influxdb
     networks:
-      - monitoring-network
+      - plc-network 
 
 networks:
-  monitoring-network:
+  plc-network:
     driver: bridge
 
 volumes:
